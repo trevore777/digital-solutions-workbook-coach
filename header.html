@@ -44,36 +44,12 @@
       z-index: -1;
     }
 
-    .ds-main {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .ds-main { display: flex; flex-direction: column; gap: 4px; }
+    .ds-title { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .ds-subtitle { font-size: 0.9rem; opacity: 0.85; }
 
-    .ds-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .ds-subtitle {
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
-
-    .ds-date {
-      margin-top: 10px;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
-
-    .ds-day {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
+    .ds-date { margin-top: 10px; font-size: 1.2rem; font-weight: 600; }
+    .ds-day { font-size: 2rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 
     .ds-weather-card {
       background: rgba(15,23,42,0.85);
@@ -94,53 +70,17 @@
       color: #a5b4fc;
     }
 
-    .ds-temp-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 10px;
-    }
+    .ds-temp-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .ds-temp { font-size: 1.8rem; font-weight: 700; }
+    .ds-weather-extra { font-size: 0.8rem; color: #e5e7eb; text-align: right; }
 
-    .ds-temp {
-      font-size: 1.8rem;
-      font-weight: 700;
-    }
-
-    .ds-weather-extra {
-      font-size: 0.8rem;
-      color: #e5e7eb;
-      text-align: right;
-    }
-
-    .ds-quote {
-      margin-top: 10px;
-      font-size: 0.85rem;
-      line-height: 1.4;
-      max-width: 520px;
-    }
-
-    .ds-quote-ref {
-      margin-top: 4px;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #a5b4fc;
-    }
-
-    .ds-small-note {
-      margin-top: 4px;
-      font-size: 0.7rem;
-      opacity: 0.75;
-    }
+    .ds-quote { margin-top: 10px; font-size: 0.85rem; line-height: 1.4; max-width: 520px; }
+    .ds-quote-ref { margin-top: 4px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: #a5b4fc; }
+    .ds-small-note { margin-top: 4px; font-size: 0.7rem; opacity: 0.75; }
 
     @media (max-width: 768px) {
-      .ds-header {
-        grid-template-columns: 1fr;
-        min-height: auto;
-      }
-      .ds-weather-card {
-        margin-left: 0;
-      }
+      .ds-header { grid-template-columns: 1fr; min-height: auto; }
+      .ds-weather-card { margin-left: 0; }
     }
   </style>
 </head>
@@ -176,7 +116,7 @@
   </div>
 
   <script>
-    // ---- Date + Day ----
+    // Date + day
     (function () {
       const now = new Date();
       document.getElementById("ds-day").textContent =
@@ -185,7 +125,7 @@
         now.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
     })();
 
-    // ---- Weather (Gold Coast coordinates) ----
+    // Weather (Reedy Creek / Gold Coast approx)
     (function () {
       const url =
         "https://api.open-meteo.com/v1/forecast?latitude=-28.08&longitude=153.39" +
@@ -211,7 +151,7 @@
         });
     })();
 
-    // ---- Daily KJV Verse ----
+    // KJV verse from bible-api.com
     (function () {
       const verses = [
         "Proverbs 3:5-6",
