@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Solutions Banner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: transparent;
+    }
+
+    #ds-header-root {
+      margin-bottom: 0;
+      padding: 0;
+    }
+
+    .ds-header {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      color: #f9fafb;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      align-items: center;
+      background: #020617;
+      min-height: 180px;
+      box-sizing: border-box;
+    }
+
+    .ds-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(120deg, rgba(15,23,42,0.95), rgba(15,23,42,0.7)),
+        url("https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=80");
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.2);
+      z-index: -1;
+    }
+
+    .ds-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ds-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .ds-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .ds-date {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .ds-day {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .ds-weather-card {
+      background: rgba(15,23,42,0.85);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 220px;
+      margin-left: auto;
+    }
+
+    .ds-weather-heading {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a5b4fc;
+    }
+
+    .ds-temp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .ds-temp {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .ds-weather-extra {
+      font-size: 0.8rem;
+      color: #e5e7eb;
+      text-align: right;
+    }
+
+    .ds-quote {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      max-width: 520px;
+    }
+
+    .ds-quote-ref {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a5b4fc;
+    }
+
+    .ds-small-note {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      opacity: 0.75;
+    }
+
+    @media (max-width: 768px) {
+      .ds-header {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .ds-weather-card {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="ds-header-root">
+    <div class="ds-header">
+      <div class="ds-main">
+        <div class="ds-title">Digital Solutions</div>
+        <div class="ds-subtitle">Unit 1 • Creating with Code</div>
+
+        <div class="ds-day" id="ds-day">Monday</div>
+        <div class="ds-date" id="ds-date">2 December 2025</div>
+
+        <div class="ds-quote" id="ds-quote">
+          Loading daily verse...
+        </div>
+        <div class="ds-quote-ref" id="ds-quote-ref"></div>
+        <div class="ds-small-note">
+          KJV verse for reflection — shaping our approach to technology and learning.
+        </div>
+      </div>
+
+      <div class="ds-weather-card">
+        <div class="ds-weather-heading">Reedy Creek Weather</div>
+        <div class="ds-temp-row">
+          <div class="ds-temp" id="ds-temp">--°C</div>
+          <div class="ds-weather-extra" id="ds-weather-extra">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Date + Day ----
+    (function () {
+      const now = new Date();
+      document.getElementById("ds-day").textContent =
+        now.toLocaleDateString("en-AU", { weekday: "long" });
+      document.getElementById("ds-date").textContent =
+        now.toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" });
+    })();
+
+    // ---- Weather (Gold Coast coordinates) ----
+    (function () {
+      const url =
+        "https://api.open-meteo.com/v1/forecast?latitude=-28.08&longitude=153.39" +
+        "&current=temperature_2m,precipitation&daily=precipitation_probability_mean&timezone=auto";
+
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          const temp = data?.current?.temperature_2m;
+          const unit = data?.current_units?.temperature_2m || "°C";
+          const precipProb = data?.daily?.precipitation_probability_mean?.[0];
+
+          document.getElementById("ds-temp").textContent =
+            temp != null ? Math.round(temp) + unit : "--°C";
+
+          document.getElementById("ds-weather-extra").textContent =
+            precipProb != null
+              ? "Chance of rain: " + precipProb + "%"
+              : "Rain data unavailable";
+        })
+        .catch(() => {
+          document.getElementById("ds-weather-extra").textContent = "Weather unavailable";
+        });
+    })();
+
+    // ---- Daily KJV Verse ----
+    (function () {
+      const verses = [
+        "Proverbs 3:5-6",
+        "James 1:5",
+        "Colossians 3:23",
+        "Psalm 119:105",
+        "Romans 12:2",
+        "Philippians 4:6-7",
+        "1 Thessalonians 5:16-18"
+      ];
+
+      const today = new Date();
+      const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+      const verseRef = verses[dayOfYear % verses.length];
+
+      const apiUrl =
+        "https://bible-api.com/" +
+        encodeURIComponent(verseRef) +
+        "?translation=kjv";
+
+      fetch(apiUrl)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("ds-quote").textContent =
+            data?.text?.trim() || "Trust in the LORD… (verse unavailable)";
+          document.getElementById("ds-quote-ref").textContent =
+            data?.reference ? data.reference + " (KJV)" : verseRef + " (KJV)";
+        })
+        .catch(() => {
+          document.getElementById("ds-quote").textContent =
+            "Trust in the LORD with all thine heart; and lean not unto thine own understanding.";
+          document.getElementById("ds-quote-ref").textContent = "Proverbs 3:5 (KJV)";
+        });
+    })();
+  </script>
+</body>
+</html>
