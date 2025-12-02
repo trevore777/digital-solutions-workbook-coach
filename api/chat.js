@@ -1,26 +1,38 @@
+// api/chat.js
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    // Allow you to test quickly in a browser
+    return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
-  const { section, message, history } = req.body;
+  try {
+    const { section, message, history } = req.body;
 
-  const systemPrompt = `
+    if (!message) {
+      return res.status(400).json({ error: "Missing 'message' in body." });
+    }
+
+    const systemPrompt = `
 You are an AI study coach for Year 11 Digital Solutions students in Queensland.
 You support Unit 1: Creating with code and the IA1 Technical Proposal.
-Provide feedback, hints, questions, and checklists only.
-Never generate full assessment responses.
-Use Australian English.
-Current workbook section: ${section}.
-  `.trim();
+You help them complete their DIGITAL WORKBOOK:
+- Explore: problem, personas, existing solutions, impacts, success criteria
+- Develop: data story, data requirements, DFD, ERD, UX & programming requirements
+- Generate: prototype screens, pseudocode/SQL, script & slides.
 
-  const messages = [
-    { role: "system", content: systemPrompt },
-    ...(history || []),
-    { role: "user", content: message }
-  ];
+Important:
+- Do NOT write full responses they can copy.
+- Give feedback, questions, hints, and checklists.
+- Use Australian English.
+Current workbook section: ${section || "not specified"}.
+    `.trim();
 
-  try {
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...(Array.isArray(history) ? history : []),
+      { role: "user", content: message }
+    ];
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -34,14 +46,20 @@ Current workbook section: ${section}.
       })
     });
 
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("OpenAI API error:", text);
+      return res.status(500).json({ error: "OpenAI API error", detail: text });
+    }
+
     const data = await response.json();
     const reply =
-      data.choices?.[0]?.message?.content || "No response generated.";
+      data.choices?.[0]?.message?.content ||
+      "Sorry, I couldn't generate a response.";
 
-    res.status(200).json({ reply });
-
+    return res.status(200).json({ reply });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error contacting OpenAI" });
+    console.error("Server error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 }
