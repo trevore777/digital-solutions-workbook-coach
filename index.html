@@ -1,152 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Digital Solutions IA1 Workbook Coach</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      background: #f3f4f6;
-      color: #111827;
+<script>
+  // Use the relative URL so it works on Vercel in any environment
+  const API_URL = "/api/chat";
+
+  let history = [];
+
+  const chatEl = document.getElementById("chat");
+  const inputEl = document.getElementById("input");
+  const sectionEl = document.getElementById("section");
+  const sendBtn = document.getElementById("sendBtn");
+
+  function addMessage(role, text) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg " + (role === "user" ? "user" : "ai");
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+    msgDiv.appendChild(bubble);
+    chatEl.appendChild(msgDiv);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    const section = sectionEl.value;
+
+    addMessage("user", text);
+    inputEl.value = "";
+    sendBtn.disabled = true;
+
+    addMessage("ai", "Thinking…");
+    const aiBubbles = chatEl.querySelectorAll(".msg.ai .bubble");
+    const thinkingBubble = aiBubbles[aiBubbles.length - 1];
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",                          // 👈 IMPORTANT
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section,
+          message: text,
+          history
+        })
+      });
+
+      const data = await res.json();
+      thinkingBubble.textContent =
+        data.reply || "Sorry, something went wrong on the server.";
+
+      history.push({ role: "user", content: text });
+      history.push({ role: "assistant", content: data.reply });
+
+    } catch (err) {
+      console.error(err);
+      thinkingBubble.textContent = "Error contacting the server.";
+    } finally {
+      sendBtn.disabled = false;
     }
-    .app {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 16px;
+  }
+
+  sendBtn.addEventListener("click", sendMessage);
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
-    h1 { font-size: 1.4rem; }
-    .subtitle {
-      font-size: 0.9rem;
-      color: #6b7280;
-      margin-bottom: 12px;
-    }
-    .controls { margin-bottom: 10px; }
-    select, textarea, button {
-      font-size: 0.9rem;
-      font-family: inherit;
-    }
-    textarea {
-      width: 100%;
-      min-height: 80px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
-    }
-    button {
-      background: #1d4ed8;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      margin-top: 12px;
-      cursor: pointer;
-    }
-    .chat {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      height: 400px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-    }
-    .msg { margin-bottom: 12px; }
-    .user { text-align: right; }
-    .ai { text-align: left; }
-    .bubble {
-      display: inline-block;
-      padding: 10px 14px;
-      border-radius: 12px;
-      max-width: 80%;
-      white-space: pre-wrap;
-    }
-    .user .bubble { background: #2563eb; color: white; }
-    .ai .bubble { background: #e5e7eb; color: #111827; }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <h1>Digital Solutions IA1 Workbook Coach</h1>
-    <div class="subtitle">Year 11 • Unit 1: Creating with code • IA1 Technical Proposal Guidance</div>
-
-    <label>Workbook Section:
-      <select id="section">
-        <option value="Explore - Problem statement">Explore – Problem statement</option>
-        <option value="Explore - Personas">Explore – Personas</option>
-        <option value="Explore - Existing solutions">Explore – Existing solutions</option>
-        <option value="Explore - Impacts">Explore – Impacts</option>
-        <option value="Explore - Success criteria">Explore – Success criteria</option>
-        <option value="Develop - Data requirements">Develop – Data requirements</option>
-        <option value="Develop - Data story">Develop – Data story</option>
-        <option value="Develop - DFD">Develop – Data Flow Diagram (DFD)</option>
-        <option value="Develop - ERD">Develop – ERD / database tables</option>
-        <option value="Develop - UX requirements">Develop – UX requirements</option>
-        <option value="Develop - Programming requirements">Develop – Programming</option>
-        <option value="Generate - Prototype screens">Generate – Prototype</option>
-        <option value="Generate - Script and slides">Generate – Script & slides</option>
-      </select>
-    </label>
-
-    <div class="chat" id="chat"></div>
-
-    <textarea id="input" placeholder="Paste your draft or question here…"></textarea>
-    <button id="sendBtn">Ask for Help</button>
-  </div>
-
-  <script>
-    const API_URL = "const API_URL = "https://digital-solutions-workbook-coach.vercel.app/api/chat";
-"; // ← CHANGE THIS
-
-    let history = [];
-
-    function addMessage(role, text) {
-      const chat = document.getElementById("chat");
-      const div = document.createElement("div");
-      div.className = "msg " + role;
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      bubble.textContent = text;
-      div.appendChild(bubble);
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    async function sendMessage() {
-      const msg = document.getElementById("input").value.trim();
-      const section = document.getElementById("section").value;
-      if (!msg) return;
-
-      addMessage("user", msg);
-      document.getElementById("input").value = "";
-
-      const thinking = "Thinking…";
-      addMessage("ai", thinking);
-
-      const aiBubble = document.querySelectorAll(".ai .bubble");
-      const current = aiBubble[aiBubble.length - 1];
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ section, message: msg, history })
-        });
-
-        const data = await res.json();
-        current.textContent = data.reply || "Something went wrong.";
-
-        history.push({ role: "user", content: msg });
-        history.push({ role: "assistant", content: data.reply });
-
-      } catch (e) {
-        current.textContent = "Error contacting the server.";
-      }
-    }
-
-    document.getElementById("sendBtn").addEventListener("click", sendMessage);
-  </script>
-</body>
-</html>
+  });
+</script>
